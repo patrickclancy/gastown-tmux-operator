@@ -1,25 +1,44 @@
 # Gas Town Operator Room with tmux
 
-This README explains the tmux setup we created for running and observing **Gas Town** on macOS.
+This guide explains how to run Gas Town inside a small tmux-based operator room on macOS.
 
-It is written for someone who is new to both:
+It is designed for people who are new to:
 
-* **tmux**
-* **Gas Town**
+- tmux
+- Gas Town
+
+It assumes you already have:
+
+- `tmux` installed
+- Gas Town installed and working
+- a town root at `~/gt` unless you override `GT_ROOT`
+
+This setup uses three files:
+
+```text
+README-gastown-tmux.md
+scripts/gastown-ops
+shell/gastown-helpers.zsh
+```
+
+For local machine use, the usual install paths are:
+
+```text
+~/bin/gastown-ops
+~/.config/gastown/gastown-helpers.zsh
+```
 
 ---
 
-## 1. What this setup is for
+## What this setup gives you
 
-This tmux setup gives you a stable **operator room** for Gas Town.
+This setup creates one tmux session named `gastown-ops` with these windows:
 
-Instead of opening random Terminal tabs and losing track of what is running, you get one tmux session with named windows:
-
-* `mayor`
-* `feed`
-* `agents`
-* `rig`
-* `scratch`
+- `mayor`
+- `feed`
+- `agents`
+- `rig`
+- `scratch`
 
 Think of it like this:
 
@@ -33,23 +52,23 @@ Terminal.app
     └── scratch -> temporary commands and notes
 ```
 
-This matches the way you want to operate Gas Town:
+That gives you:
 
-* one place to **give commands**
-* one place to **watch activity**
-* one place to **inspect running agents**
-* one place to **verify repo changes**
-* one place for **temporary work**
+- one place to talk to Gas Town
+- one place to monitor activity
+- one place to inspect sessions and agents
+- one place to verify repo changes
+- one place for temporary commands
 
 ---
 
-# 2. What tmux is
+## What tmux is
 
-`tmux` is a **terminal multiplexer**.
+`tmux` is a terminal multiplexer.
 
-That means it lets you run multiple terminal workspaces inside one Terminal window, and it keeps them alive even if you detach and come back later.
+It lets you run multiple terminal workspaces inside one Terminal window and keep them alive even after you detach.
 
-### Basic tmux hierarchy
+Basic structure:
 
 ```text
 tmux
@@ -60,29 +79,90 @@ tmux
 
 Meaning:
 
-* **session** = the overall workspace
-* **window** = like a tab inside tmux
-* **pane** = a split terminal inside a window
+- **session** = the overall workspace
+- **window** = like a tab
+- **pane** = a split terminal inside a window
 
-In our setup:
+In this setup:
 
-* session = `gastown-ops`
-* windows = `mayor`, `feed`, `agents`, `rig`, `scratch`
-* panes = splits inside `feed`, `agents`, and `rig`
+- session = `gastown-ops`
+- windows = `mayor`, `feed`, `agents`, `rig`, `scratch`
+- panes = the splits inside `feed`, `agents`, and `rig`
 
 ---
 
-# 3. The tmux ideas you need to know
+## Repo layout
 
-You do **not** need to learn all of tmux to use this setup.
+A clean repo layout looks like this:
 
-You mainly need these.
+```text
+README-gastown-tmux.md
+scripts/gastown-ops
+shell/gastown-helpers.zsh
+```
 
-## Prefix key
+Suggested local install:
+
+```text
+~/bin/gastown-ops
+~/.config/gastown/gastown-helpers.zsh
+```
+
+---
+
+## Installation
+
+### 1. Save the operator script
+
+Copy the repo script into:
+
+```bash
+~/bin/gastown-ops
+```
+
+Make it executable:
+
+```bash
+chmod +x ~/bin/gastown-ops
+```
+
+### 2. Make sure `~/bin` is on your PATH
+
+Add this to `~/.zshrc` if needed:
+
+```bash
+export PATH="$HOME/bin:$PATH"
+```
+
+### 3. Save the helper file
+
+Copy the helper file into:
+
+```bash
+~/.config/gastown/gastown-helpers.zsh
+```
+
+### 4. Source the helper file from `~/.zshrc`
+
+Add this line:
+
+```bash
+source ~/.config/gastown/gastown-helpers.zsh
+```
+
+### 5. Reload your shell
+
+```bash
+source ~/.zshrc
+```
+
+---
+
+## tmux basics you actually need
 
 tmux commands start with a prefix.
 
-Default tmux prefix:
+Default prefix:
 
 ```text
 Ctrl+b
@@ -94,301 +174,156 @@ That means:
 2. release
 3. press another key
 
-Example:
+### Move between windows
 
 ```text
-Ctrl+b w
+Ctrl+b n   next window
+Ctrl+b p   previous window
+Ctrl+b w   window list
 ```
 
-opens the window list.
-
----
-
-# 4. tmux commands you’ll use most
-
-## Move between windows
-
-```text
-Ctrl+b n
-```
-
-Next window
-
-```text
-Ctrl+b p
-```
-
-Previous window
-
-```text
-Ctrl+b w
-```
-
-Show window list and choose one
-
-### Practical use
-
-This is how you move between:
-
-* `mayor`
-* `feed`
-* `agents`
-* `rig`
-* `scratch`
-
----
-
-## See tmux sessions
-
-```text
-Ctrl+b s
-```
-
-Show session list
-
-### Practical use
-
-If you ever end up with more than one tmux session, this lets you jump between them.
-
----
-
-## Split panes
-
-You do not need these often because the script already creates the main panes, but they are useful.
-
-```text
-Ctrl+b %
-```
-
-Split vertically
-
-```text
-Ctrl+b "
-```
-
-Split horizontally
-
----
-
-## Move between panes
+### Move between panes
 
 ```text
 Ctrl+b then arrow key
 ```
 
-Move to another pane
+### Session list
 
-Example:
+```text
+Ctrl+b s
+```
 
-* `Ctrl+b` then left arrow
-* `Ctrl+b` then down arrow
-
----
-
-## Detach from tmux
+### Detach from tmux
 
 ```text
 Ctrl+b d
 ```
 
-This exits the tmux view but leaves everything running.
+This leaves everything running and returns you to your normal shell.
 
-This is one of the biggest benefits of tmux.
+### Reattach later
 
-### Practical use
-
-You can leave Gas Town running, close your Terminal tab, then come back later.
-
----
-
-## Reattach later
-
-From a normal shell, not from inside tmux:
-
-```bash
-tmux attach -t gastown-ops
-```
-
-Or with your helper:
+From a normal shell:
 
 ```bash
 gtops_attach
 ```
 
+or:
+
+```bash
+tmux attach -t gastown-ops
+```
+
 ---
 
-# 5. How to scroll up and down in tmux
+## How to scroll in tmux
 
-This is the part that usually trips up new tmux users.
+This is one of the biggest beginner pain points.
 
-When a window like `mayor` prints a lot of text, your normal mouse wheel may not work the way you expect unless tmux mouse support is enabled and the program in that pane is not capturing input.
+When a pane like `mayor` prints a lot of text, the most reliable way to scroll back is tmux copy mode.
 
-The most reliable way to scroll is **copy mode**.
-
-## Enter copy mode
+### Enter copy mode
 
 ```text
 Ctrl+b [
 ```
 
-That puts you into tmux scrollback mode.
-
-## Move around in copy mode
-
-Use these keys:
+### Move around in copy mode
 
 ```text
 Up / Down arrows     move line by line
 Page Up / Page Down  move by pages
-g                    jump to the top
-G                    jump to the bottom
+g                    jump to top
+G                    jump to bottom
+j                    down
+k                    up
+Ctrl+u               half page up
+Ctrl+d               half page down
 ```
 
-Because your tmux config uses vi-style keys, these also work:
-
-```text
-k        up
-j        down
-Ctrl+u   half page up
-Ctrl+d   half page down
-```
-
-## Exit copy mode
+### Exit copy mode
 
 ```text
 q
 ```
 
-or
+or:
 
 ```text
 Enter
 ```
 
-## The simplest beginner pattern
+### Mouse scrolling
 
-When `mayor` prints a lot of text:
+If your tmux config has mouse support enabled, trackpad or mouse wheel scrolling may work.
 
-1. press `Ctrl+b [`
-2. use `Page Up`, `Page Down`, arrows, `j`, or `k`
-3. press `q` to leave scroll mode
+But when it feels inconsistent, use:
 
-## Mouse scrolling
-
-Your tmux config has:
-
-```tmux
-set -g mouse on
+```text
+Ctrl+b [
 ```
 
-So in many cases you can also use:
-
-* two-finger scroll on a trackpad
-* mouse wheel
-
-But when that feels inconsistent, use **copy mode**. It is the dependable method.
-
-## Why this matters for Gas Town
-
-The `mayor` window often outputs a lot of text. The `feed` window can also move quickly. Copy mode gives you a dependable way to inspect earlier output without losing your place.
+That is the dependable method.
 
 ---
 
-# 6. How to start this setup
+## Starting the operator room
 
-## Start the operator room
-
-From a normal terminal:
+### Generic start
 
 ```bash
 gtops
 ```
 
-Or target a rig:
+### Start with a specific rig name
 
 ```bash
-gtops gastown-ops innercheck
+gtops gastown-ops <rig-name>
 ```
 
-That launches the tmux session and opens the windows.
+This starts or reattaches the tmux session.
 
----
-
-## Inside the mayor window
-
-Once the session opens, run:
+When the session opens, go to the `mayor` window and run:
 
 ```bash
 gt mayor attach
 ```
 
-That is the intended next step.
-
 ---
 
-# 7. What each window is for
+## What each window is for
 
-This is the part that matters most.
+### `mayor`
 
----
+This is your main command window.
 
-## `mayor`
+Use it to:
 
-### What it is
+- attach to the Mayor
+- issue high-level instructions
+- operate Gas Town at the top level
 
-This is your **main command window**.
-
-### What you do here
-
-You use this window to:
-
-* attach to the Mayor
-* issue high-level instructions
-* interact with Gas Town at the top level
-
-### Typical command
+Typical command:
 
 ```bash
 gt mayor attach
 ```
 
-### How it fits development
-
-This is where you act like the operator or manager of the system.
-
-Examples:
-
-* ask Gas Town to work on a bug
-* start or inspect coordination work
-* guide the system at a high level
-
-### Mental model
-
-Think of `mayor` as:
+Mental model:
 
 ```text
-control room / chief-of-staff / orchestrator console
+control room / orchestration console
 ```
-
-### Example workflow
-
-You enter the `mayor` window and start the session:
-
-```bash
-gt mayor attach
-```
-
-Then you guide work from there.
 
 ---
 
-## `feed`
+### `feed`
 
-### What it is
+This is your live activity monitor.
 
-This is your **live activity monitor**.
-
-### What panes it has
+It has two panes:
 
 Left pane:
 
@@ -402,45 +337,25 @@ Right pane:
 gt feed --problems
 ```
 
-### What you do here
+Use it to watch:
 
-You use this window to watch:
+- current activity
+- movement through the town
+- visible problems or stalls
 
-* current activity
-* work moving through the town
-* issues, stalled behavior, or suspicious output
-
-### How it fits development
-
-This is like your dashboard.
-
-Use it when you want to answer:
-
-* Is the town doing work right now?
-* Is anything failing?
-* Are there blocked or unhealthy workers?
-
-### Mental model
-
-Think of `feed` as:
+Mental model:
 
 ```text
-live event stream + trouble monitor
+event stream + trouble monitor
 ```
-
-### Example workflow
-
-After asking the Mayor to do something, switch to `feed` and watch whether activity appears and whether problems show up.
 
 ---
 
-## `agents`
+### `agents`
 
-### What it is
+This is your agent and session inspection window.
 
-This is your **agent/session inspection window**.
-
-### What panes it has
+It has three panes:
 
 Pane 1:
 
@@ -455,409 +370,193 @@ tmux ls
 ```
 
 Pane 3:
-instructions / notes
 
-### What you do here
+notes / reminders
 
-You use this window to inspect:
+Use it to inspect:
 
-* what Gas Town thinks is running
-* what tmux sessions actually exist
-* whether there are mismatches or too much session sprawl
+- what Gas Town thinks is running
+- what tmux sessions actually exist
+- mismatches between logical state and tmux state
 
-### How it fits development
-
-This is very useful when:
-
-* something seems stuck
-* you want to see active workers
-* you are learning how Gas Town maps onto tmux
-* you want to debug session behavior
-
-### Mental model
-
-Think of `agents` as:
+Mental model:
 
 ```text
-system inventory + session map
+runtime inventory + session map
 ```
-
-### Example questions this window helps answer
-
-* Do I actually have agents running?
-* Are tmux sessions alive?
-* Is Gas Town showing active agents but tmux is missing something?
-* Did something die silently?
 
 ---
 
-## `rig`
+### `rig`
 
-### What it is
+This is your repo verification window.
 
-This is your **repo work and verification window**.
+It has three panes:
 
-### What panes it has
+- top pane for path and file listing
+- bottom-left pane for `git status`
+- bottom-right pane for tests, logs, diffs, or app runtime
 
-Top pane:
-current directory / file listing
+Use it to:
 
-Bottom-left pane:
-git status
+- confirm you are in the right folder
+- inspect repo changes
+- run tests
+- run app commands
+- validate what the town is doing against the codebase
 
-Bottom-right pane:
-free pane for tests, server, diffs, or logs
-
-### What you do here
-
-You use this window for normal development support work:
-
-* verify you are in the right repo
-* inspect files
-* run tests
-* check git status
-* inspect diffs
-* run app commands
-
-### How it fits development
-
-This is where you validate what the system is changing.
-
-The Mayor may coordinate work, and `feed` may show activity, but `rig` is where you verify the actual codebase.
-
-### Mental model
-
-Think of `rig` as:
+Mental model:
 
 ```text
-human review and verification workspace
+human verification workspace
 ```
-
-### Example uses
-
-In the free pane you might run:
-
-```bash
-pnpm test
-```
-
-or
-
-```bash
-npm run dev
-```
-
-or
-
-```bash
-git diff
-```
-
-This is the window where you maintain confidence that the work happening in Gas Town lines up with the repo state you care about.
 
 ---
 
-## `scratch`
+### `scratch`
 
-### What it is
-
-This is your **temporary work area**.
-
-It is not a formal Gas Town concept. It is just good operator hygiene.
-
-### What you do here
+This is your temporary workspace.
 
 Use it for:
 
-* one-off commands
-* temporary notes
-* grep/find work
-* experiments
-* commands you do not want cluttering the main windows
+- one-off commands
+- notes
+- grep/find work
+- experiments
+- anything you do not want to clutter the core windows
 
-### How it fits development
-
-This keeps the important windows clean.
-
-Instead of polluting `mayor` or `rig`, use `scratch` when you want to try something quickly.
-
-### Mental model
-
-Think of `scratch` as:
+Mental model:
 
 ```text
-clipboard / workbench / throwaway terminal
+throwaway workbench
 ```
 
 ---
 
-# 8. Recommended beginner workflow
+## Recommended daily workflow
 
-Here is the simple daily pattern.
+### Start of day
 
-## Step 1: start the room
-
-```bash
-gtops gastown-ops innercheck
-```
-
-## Step 2: in `mayor`, attach
-
-```bash
-gt mayor attach
-```
-
-## Step 3: inspect `feed`
-
-Use:
-
-```text
-Ctrl+b w
-```
-
-Select `feed`.
-
-Watch for activity and problems.
-
-## Step 4: inspect `agents`
-
-Look at:
-
-* `gt agents`
-* `tmux ls`
-
-This helps you understand what Gas Town is running.
-
-## Step 5: inspect `rig`
-
-Check:
-
-* current folder
-* `git status`
-* tests or app runtime
-
-## Step 6: use `scratch` for one-offs
-
-Do temporary work there instead of cluttering the important windows.
-
-## Step 7: scroll back when needed
-
-If any window outputs too much text:
-
-```text
-Ctrl+b [
-```
-
-Then use arrow keys, Page Up/Page Down, or `j` and `k`.
-
-Press `q` when done.
-
-## Step 8: detach when done
-
-```text
-Ctrl+b d
-```
-
-## Step 9: later, reattach
-
-```bash
-gtops_attach
-```
-
----
-
-# 9. Shutdown and restart
-
-## Recommended stop command
-
-From a normal terminal tab:
-
-```bash
-cd ~/gt
-gt down
-```
-
-### Why use a separate terminal tab
-
-This keeps shutdown separate from your operator view and reduces confusion while you are still learning tmux.
-
----
-
-# 9A. Start-of-day and end-of-day routine
-
-This is the simplest routine to follow when you begin work and when you are done for the day.
-
-## Start of day
-
-### 1. Open a normal Terminal tab
-
-Go to your Gas Town root:
+1. Open a normal Terminal tab
+2. Go to your town root:
 
 ```bash
 cd ~/gt
 ```
 
-### 2. Start your operator room
+3. Start the operator room:
 
 ```bash
-gtops gastown-ops innercheck
+gtops gastown-ops <rig-name>
 ```
 
-Or, if you are not targeting a rig:
+or:
 
 ```bash
 gtops
 ```
 
-### 3. In the `mayor` window, attach to the Mayor
+4. In the `mayor` window, attach:
 
 ```bash
 gt mayor attach
 ```
 
-### 4. Check the room quickly
+5. Quickly inspect:
 
-Look at:
+- `feed`
+- `agents`
+- `rig`
 
-* `feed` to see current activity
-* `agents` to see what is running
-* `rig` to confirm you are in the right place
+6. Start work
 
-This gives you a fast health check before you start real work.
-
-### 5. Begin work
+### During the day
 
 Use:
 
-* `mayor` for high-level direction
-* `feed` for monitoring
-* `agents` for inspection
-* `rig` for repo verification
-* `scratch` for one-off commands
+- `mayor` for direction and coordination
+- `feed` for monitoring
+- `agents` for inspection
+- `rig` for verification
+- `scratch` for side work
 
-## End of day
+If a pane prints too much text, scroll with:
 
-When you are done working and want to shut down your computer, follow this routine.
+```text
+Ctrl+b [
+```
 
-### 1. Stop giving new work
+### End of day
 
-Do not start a new task in the `mayor` window right before leaving.
-
-### 2. Check `feed`
-
-Look at the `feed` window and see whether the town is still busy or whether there are visible problems.
-
-### 3. Check `agents`
-
-Look at the `agents` window and see what is still running.
-
-### 4. Park or hand off anything important
-
-If you are in the middle of something and want to preserve the state of your work, avoid just abandoning it mentally. Make a quick note for yourself in `scratch`, or use Gas Town workflow commands that fit your process.
-
-### 5. Detach from tmux
-
-Inside tmux:
+1. Stop giving new work
+2. Check `feed`
+3. Check `agents`
+4. Make notes in `scratch` if needed
+5. Detach from tmux:
 
 ```text
 Ctrl+b d
 ```
 
-This cleanly detaches your operator room.
-
-### 6. From a normal Terminal tab, stop Gas Town
-
-Use your regular day-to-day stop command:
+6. From a normal Terminal tab, stop Gas Town:
 
 ```bash
 cd ~/gt
 gt down
 ```
 
-### 7. If the system behaved strangely, do a cleaner shutdown
-
-If Gas Town seemed unhealthy, mismatched, or stuck, use:
+7. If the system behaved strangely that day, use a cleaner shutdown:
 
 ```bash
 cd ~/gt
 gt shutdown
 ```
 
-### 8. Shut down your Mac
+8. Shut down your Mac normally
 
-Once Gas Town has been stopped, shut down your computer normally.
-
-## Simple rule of thumb
-
-Use this:
+Rule of thumb:
 
 ```text
 Normal day  -> gt down
 Weird day   -> gt shutdown
 ```
 
-## End-of-day quick checklist
-
-```text
-1. Stop assigning new work
-2. Check feed
-3. Check agents
-4. Park or note anything important
-5. Detach from tmux
-6. Run: cd ~/gt && gt down
-7. Shut down Mac
-```
-
 ---
 
-# 10. Common mistakes
+## Common mistakes
 
-## Mistake 1: running `tmux attach` inside tmux
+### Running `tmux attach` from inside tmux
 
-If you run:
-
-```bash
-tmux attach -t gastown-ops
-```
-
-from inside tmux, you may get:
+You may see:
 
 ```text
 sessions should be nested with care, unset $TMUX to force
 ```
 
-### Why
+That means you are already inside tmux.
 
-Because you are already inside a tmux session.
+Use these instead:
 
-### What to do instead
+```text
+Ctrl+b w
+Ctrl+b s
+Ctrl+b n
+Ctrl+b p
+```
 
-Use:
+### Forgetting to attach the Mayor
 
-* `Ctrl+b w`
-* `Ctrl+b s`
-* `Ctrl+b n`
-* `Ctrl+b p`
+Opening the operator room does not automatically start the Mayor conversation.
 
----
-
-## Mistake 2: forgetting the Mayor command
-
-Opening the room does **not** automatically attach the Mayor.
-
-You still need to run:
+You still need:
 
 ```bash
 gt mayor attach
 ```
 
-in the `mayor` window.
+### Not knowing how to scroll back
 
----
-
-## Mistake 3: not knowing how to scroll
-
-If the `mayor` or `feed` window prints too much text, enter copy mode:
+Use:
 
 ```text
 Ctrl+b [
@@ -865,84 +564,89 @@ Ctrl+b [
 
 Then navigate and press `q` to exit.
 
----
+### Mixing shutdown commands into the active operator room
 
-## Mistake 4: using the wrong window for the wrong job
-
-A simple rule:
-
-* `mayor` = control
-* `feed` = monitoring
-* `agents` = inspection
-* `rig` = repo verification
-* `scratch` = temporary work
-
----
-
-# 11. Quick reference
-
-## Start room
-
-```bash
-gtops gastown-ops innercheck
-```
-
-## In mayor
-
-```bash
-gt mayor attach
-```
-
-## Stop town
+It is cleaner to run:
 
 ```bash
 cd ~/gt
 gt down
 ```
 
-## Detach tmux
+from a normal terminal tab.
+
+---
+
+## Quick reference
+
+### Start room
+
+```bash
+gtops
+```
+
+or:
+
+```bash
+gtops gastown-ops <rig-name>
+```
+
+### In mayor
+
+```bash
+gt mayor attach
+```
+
+### Stop town
+
+```bash
+cd ~/gt
+gt down
+```
+
+### Detach tmux
 
 ```text
 Ctrl+b d
 ```
 
-## Reattach tmux
+### Reattach tmux
 
 ```bash
 gtops_attach
 ```
 
-## Window list
+### Window list
 
 ```text
 Ctrl+b w
 ```
 
-## Session list
+### Session list
 
 ```text
 Ctrl+b s
 ```
 
-## Next window
+### Next window
 
 ```text
 Ctrl+b n
 ```
 
-## Previous window
+### Previous window
 
 ```text
 Ctrl+b p
 ```
 
-## Move panes
+### Move between panes
 
 ```text
 Ctrl+b then arrow key
 ```
 
-## Scroll back
+### Scroll back
 
 ```text
 Ctrl+b [
@@ -952,33 +656,50 @@ Then use arrows, Page Up/Page Down, `j`, `k`, `g`, `G`, and press `q` to exit.
 
 ---
 
-# 12. Best mental model for a beginner
+## Appendix A: helper file
 
-Here is the simplest way to think about the whole setup:
+Use the separate `gastown-helpers.zsh` file for shell helpers.
 
-```text
-mayor   = tell Gas Town what to do
-feed    = watch what is happening
-agents  = see who is running
-rig     = inspect the repo and validate work
-scratch = do temporary side work
+Suggested local path:
+
+```bash
+~/.config/gastown/gastown-helpers.zsh
 ```
 
-If you remember just that, the setup will feel much less confusing.
+Source it from `~/.zshrc`:
+
+```bash
+source ~/.config/gastown/gastown-helpers.zsh
+```
 
 ---
 
-# 13. Appendix A: current `gastown-ops` script
+## Appendix B: operator script
 
-See the gastown-ops file in this repo
+Use the separate `gastown-ops` file for the tmux session bootstrap.
+
+Suggested local path:
+
+```bash
+~/bin/gastown-ops
+```
+
+Make it executable:
+
+```bash
+chmod +x ~/bin/gastown-ops
+```
 
 ---
 
-# 14. Appendix B: zsh helpers
+## Appendix C: suggested local setup
 
-See the zsh-helpers file in this repo contains the helpers.
+Add this to `~/.zshrc` if needed:
 
-Add these to your `~/.zshrc`:
+```bash
+export PATH="$HOME/bin:$PATH"
+source ~/.config/gastown/gastown-helpers.zsh
+```
 
 Then reload:
 

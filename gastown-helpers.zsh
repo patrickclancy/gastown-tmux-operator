@@ -1,6 +1,3 @@
-# Add these to your `~/.zshrc`:
-# run in the terminal to have them take effect. `source ~/.zshrc`
-
 gtops() {
   local session="${1:-gastown-ops}"
   local rig="${2:-}"

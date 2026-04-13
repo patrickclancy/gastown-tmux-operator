@@ -16,7 +16,7 @@ It assumes you already have:
 This setup uses three files:
 
 ```text
-README-gastown-tmux.md
+README.md
 scripts/gastown-ops
 shell/gastown-helpers.zsh
 ```
@@ -96,7 +96,7 @@ In this setup:
 A clean repo layout looks like this:
 
 ```text
-README-gastown-tmux.md
+README.md
 scripts/gastown-ops
 shell/gastown-helpers.zsh
 ```

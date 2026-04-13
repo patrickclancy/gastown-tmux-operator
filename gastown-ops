@@ -29,13 +29,11 @@ resolve_rig_path() {
     return 0
   fi
 
-  # Most likely current layout: ~/gt/<rig>
   if [[ -d "$GT_ROOT/$rig" ]]; then
     printf '%s\n' "$GT_ROOT/$rig"
     return 0
   fi
 
-  # Common subdirs you may want to land in if they exist
   if [[ -d "$GT_ROOT/$rig/crew" ]]; then
     printf '%s\n' "$GT_ROOT/$rig/crew"
     return 0
@@ -46,7 +44,6 @@ resolve_rig_path() {
     return 0
   fi
 
-  # Fallback: search one level down for an exact rig dir name
   local found=""
   found="$(find "$GT_ROOT" -maxdepth 2 -type d -name "$rig" 2>/dev/null | head -n 1 || true)"
   if [[ -n "$found" ]]; then
@@ -54,7 +51,6 @@ resolve_rig_path() {
     return 0
   fi
 
-  # Safe fallback
   printf '%s\n' "$GT_ROOT"
 }
 
@@ -64,7 +60,6 @@ safe_new_window() {
   tmux new-window -t "$session" -n "$name"
 }
 
-# If already inside tmux, do not try to attach again
 if [[ -n "${TMUX:-}" ]]; then
   echo "Already inside tmux."
   echo "Use Ctrl+b w for window list."
@@ -73,23 +68,19 @@ if [[ -n "${TMUX:-}" ]]; then
   exit 0
 fi
 
-# Attach if the session already exists
 if tmux has-session -t "$SESSION" 2>/dev/null; then
   exec tmux attach -t "$SESSION"
 fi
 
 RIG_PATH="$(resolve_rig_path "$RIG_NAME")"
 
-# Create session
 tmux new-session -d -s "$SESSION" -n mayor
 
-# Window 1: mayor
 tmux send-keys -t "$SESSION:mayor" "cd \"$GT_ROOT\"" C-m
 tmux send-keys -t "$SESSION:mayor" "clear" C-m
 tmux send-keys -t "$SESSION:mayor" "echo 'Mayor window ready. Run: gt mayor attach'" C-m
 tmux send-keys -t "$SESSION:mayor" "echo 'Town root: $GT_ROOT'" C-m
 
-# Window 2: feed
 safe_new_window "$SESSION" feed
 tmux send-keys -t "$SESSION:feed" "cd \"$GT_ROOT\"" C-m
 tmux send-keys -t "$SESSION:feed" "$(refresh_loop 'gt feed')" C-m
@@ -97,7 +88,6 @@ tmux split-window -h -t "$SESSION:feed"
 tmux send-keys -t "$SESSION:feed" "$(refresh_loop 'gt feed --problems')" C-m
 tmux select-layout -t "$SESSION:feed" even-horizontal
 
-# Window 3: agents
 safe_new_window "$SESSION" agents
 tmux send-keys -t "$SESSION:agents" "cd \"$GT_ROOT\"" C-m
 tmux send-keys -t "$SESSION:agents" "$(refresh_loop 'gt agents')" C-m
@@ -108,7 +98,6 @@ tmux send-keys -t "$SESSION:agents" "echo 'Use Ctrl+b s for sessions and Ctrl+b 
 tmux send-keys -t "$SESSION:agents" "echo 'Avoid tmux attach from inside tmux.'" C-m
 tmux select-layout -t "$SESSION:agents" tiled
 
-# Window 4: rig
 safe_new_window "$SESSION" rig
 tmux send-keys -t "$SESSION:rig" "cd \"$RIG_PATH\"" C-m
 tmux send-keys -t "$SESSION:rig" "clear" C-m
@@ -120,12 +109,10 @@ tmux split-window -h -t "$SESSION:rig"
 tmux send-keys -t "$SESSION:rig" "echo 'Use this pane for tests, app runtime, diffs, or logs'" C-m
 tmux select-layout -t "$SESSION:rig" main-horizontal
 
-# Window 5: scratch
 safe_new_window "$SESSION" scratch
 tmux send-keys -t "$SESSION:scratch" "cd \"$GT_ROOT\"" C-m
 tmux send-keys -t "$SESSION:scratch" "echo 'Scratch window for ad hoc commands'" C-m
 
-# Optional doctor window
 if [[ "$ENABLE_DOCTOR" == "1" ]]; then
   safe_new_window "$SESSION" doctor
   tmux send-keys -t "$SESSION:doctor" "cd \"$GT_ROOT\"" C-m
